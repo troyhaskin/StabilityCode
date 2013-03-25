@@ -6,6 +6,10 @@ function [q,Thermo] = SolveSteadyStateSweeper(q,Thermo,Info)
     % Sweep through the control volumes
     for k = 1 : Info.Ncv
     
+        if isnan(Thermo.T(k))
+            g = [];
+        end
+        
         % Get the next control volume's state
         [q(:,k+1),State] = SolveSteadyStateCV(q(:,k),Info.CV(k),q(:,k+1));
         

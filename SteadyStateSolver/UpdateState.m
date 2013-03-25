@@ -8,8 +8,8 @@ function State = UpdateState(q,State,Info)
     Int = rhoi/rho;
     
     % Thermodynamics
-    State.T = Temperature(rho,Int,State.T,false);
-    State.P = Pressure   (rho,State.T,false);
+    State.T = Temperature(rho,Int,State.T);
+    State.P = Pressure   (rho,State.T);
     
     % Transport
     [~,State] = tauWall(q,State,Info);

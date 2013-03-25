@@ -15,7 +15,7 @@ function [F,State] = CalculateFlux(q,Tguess,PhaseCheck)
     i = rhoi / rho;
     
     % Theromdynamics properties
-    [T,PhaseCheck] = Temperature(rho,i,Tguess,PhaseCheck);
+    [T,PhaseCheck] = Temperature(rho,i,Tguess);
 %     Show([rho,i,T]','%+17.8E');
     P = Pressure(rho,T,PhaseCheck);
     
