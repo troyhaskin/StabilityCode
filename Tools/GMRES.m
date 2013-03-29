@@ -26,7 +26,16 @@ function [x,Residual,LastResidualVec] = GMRES(A,b,x0,Nmax,r0)
     
     Niter = Nmax;
     
+    Pinv = diag(1./diag(A));
+    A    = A*Pinv;
+%     Pinv = 1;
+    
     for k = 1:Niter
+        
+        if(k==Nmax)
+            g = [];
+        end
+        
         v = A*Q(:,k);
         
         H(1:k,k) = Q(:,1:k)'*v;
@@ -45,7 +54,7 @@ function [x,Residual,LastResidualVec] = GMRES(A,b,x0,Nmax,r0)
     end
     
     Residual = [norm(r0,2);Residual];
-    x = x0 + dx;
+    x = Pinv*(x0 + dx);
     LastResidualVec = rk;
 % %     if PerformFinalProjection
 %         H(:,Nmax)   = Q'*v                 ;
