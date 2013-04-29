@@ -27,7 +27,7 @@ function [qNext,State] = SolveSteadyStateCV(qLast,Info,qGuess)
         StepSizeTooBig = true      ;
         
         while StepSizeTooBig
-            [Residual,~,State]    = CalculateResidual(qCandidate,qLast,Flast,Slast,State,Info);
+            [Residual,~,StateCand]    = CalculateResidual(qCandidate,qLast,Flast,Slast,State,Info);
             NormResidualCandidate = norm(Residual,1);
 
             ErrorNotReduced = (NormResidualCandidate > NormResidual);
@@ -44,6 +44,7 @@ function [qNext,State] = SolveSteadyStateCV(qLast,Info,qGuess)
             end;
 
         end
+        State        = StateCand;
         qN           = qCandidate               ;
         NormStepSize = norm(alpha*dqN./qN,1)    ;
         NormResidual = NormResidualCandidate    ;
