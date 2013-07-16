@@ -1,4 +1,4 @@
-function [x,Residual,LastResidualVec] = GMRES(A,b,x0,Nmax,r0)
+function [x,Residual,LastResidualVec] = GMRES2(A,b,x0,Nmax,r0)
     
     N = length(b);
     
@@ -9,29 +9,33 @@ function [x,Residual,LastResidualVec] = GMRES(A,b,x0,Nmax,r0)
     if (nargin < 3) || isempty(x0)
         x0 = zeros(length(b),1);
     end
-
+    
     if (nargin < 5) || isempty(r0)
         r0 = b - A*x0;
     end
-
+    
     Nallocate = (Nmax == N)*N + (Nmax < N)*(Nmax+1);
-
+    
     beta     = norm(r0,2) * [1;zeros(Nallocate,1)]  ;
-
+    
     H        = zeros(Nallocate , Nmax)  ;
     Q        = zeros(N         , Nmax)  ;
     Q(:,1)   = r0./norm(r0,2)           ;
-
+    
     Residual = zeros(Nmax,1);
     
     Niter = Nmax;
     
-    for k = 1:Niter
+    for k = 1:Niter-1
+        
+        % Form
         v = A*Q(:,k);
         
-        H(1:k,k) = Q(:,1:k)'*v;
-        v        = v - sum(Q(:,1:k)*H(1:k,k),2);
-        
+        % Form the k-th column of the Hessenberg
+        for m = 1:k
+            H(m,k) = Q(:,m)'*v;
+            v      = v - H(m,k)*Q(:,m);
+        end
         H(k+1,k) = norm(v,2);
         Q(:,k+1) = v/H(k+1,k);
         
@@ -41,10 +45,11 @@ function [x,Residual,LastResidualVec] = GMRES(A,b,x0,Nmax,r0)
         rk = r0 - A*dx;
         rkNorm = norm(rk,2);
         
-        Residual(k) = rkNorm/norm(r0,2);
+        Residual(k) = rkNorm;
     end
     
-    x = x0 + dx;
+    Residual = [norm(r0,2);Residual];
+    x =  (x0 + dx);
     LastResidualVec = rk;
     
 end

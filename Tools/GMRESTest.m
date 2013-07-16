@@ -2,22 +2,22 @@ tic;
 clc;
 clear('all');
 
-N = 10         ;
+N = 100         ;
 % A = wilkinson(N); 
 A = rand(N,N) + diag(ones(N,1))   ;
 x = rand(N,1)   ;
 b = A*x         ;
 
-Nrestart = 100;
+Nrestart = 20;
 
 tic;
-[xMine,ResidualMine] = GMRES(A,b,[],N);
+[xGMRES1,R1] = GMRES(A,b,[],N);
 toc
 
 tic;
-xDirect = A\b;
+[xGMRES2,R2] = GMRES2(A,b,[],N);
 toc
 
-% semilogy(0:length(ResidualMine)-1,ResidualMine/ResidualMine(1),'r');
+semilogy(0:length(R1)-1,R1,'o',0:length(R2)-1,R2);
 
 

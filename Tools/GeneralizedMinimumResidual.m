@@ -1,4 +1,4 @@
-function [x,Residual,LastResidualVec] = GMRES(A,b,x0,Nmax,r0)
+function [x,Residual,LastResidualVec] = GeneralizedMinimumResidual(A,x0,r0)
     
     N = length(b);
     
