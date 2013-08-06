@@ -1,4 +1,4 @@
-function qk = JFNK(q0,F,epsilon)
+function [qk,RunStats] = JFNK(q0,F,epsilon)
     
     qk = q0         ;
     N  = length(qk) ;
@@ -23,6 +23,8 @@ function qk = JFNK(q0,F,epsilon)
     % Iteration counters
     IterationsNonlinear = 0;
     IterationsLinear    = 0;
+    IterationsBackTrackingActive = 0;
+    IterationsBackTrackingTotal  = 0;
     
     % Start: Nonlinear Solve
     while NotDone
@@ -67,9 +69,12 @@ function qk = JFNK(q0,F,epsilon)
         if rNew > rBest
 
             alpha = 1;
+            IterationsBackTrackingActive = IterationsBackTrackingActive + 1;
             while rNew > rBest
                 alpha = alpha / 2;
                 rNew  = norm(F(qk - alpha * dx),2);
+                
+                IterationsBackTrackingTotal = IterationsBackTrackingTotal + 1;
             end
 
         else
@@ -87,6 +92,14 @@ function qk = JFNK(q0,F,epsilon)
         % Perform convergence checks and iteration stepping
         NotDone             = norm(rk,2) > Tolerance    ;
         IterationsNonlinear = IterationsNonlinear + 1   ;
+    end
+    
+    
+    if (nargout >= 2)
+        RunStats.Iterations.Nonlinear          = IterationsNonlinear            ;
+        RunStats.Iterations.Linear             = IterationsLinear               ;
+        RunStats.Iterations.BackTrackingActive = IterationsBackTrackingActive   ;
+        RunStats.Iterations.BackTrackingTotal  = IterationsBackTrackingTotal    ;
     end
 
 end
