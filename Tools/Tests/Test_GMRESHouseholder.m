@@ -15,7 +15,7 @@ r0        = b               ; % Initial residual (b - A*0)
 Nrestarts = 20              ; % Number of Arnoldi vectors to save
 Nmax      = 20              ; % Maximum number of iterations
 Tolerance = 1E-12           ; % Relative tolerance cutoff
-nu        = 0.80            ; % ASGMRES weight factor
+nu        = 0.90            ; % ASGMRES weight factor
 
 % Non-Preconditioned solves
 PreConditionerLeft  = @(v) v;

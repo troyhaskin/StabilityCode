@@ -1,4 +1,4 @@
-function [x,IterationsNonlinear] = JFNKHouseholder(x0,F,epsilon)
+function [x,IterationsNonlinear] = JFNKHouseholderWithConstraints(x0,F,epsilon)
 
     
     % ================================================================= %

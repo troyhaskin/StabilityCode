@@ -46,14 +46,13 @@ function [x,Residuals] = GMRESHouseholderCore(A,r0,x0,Nrestarts,Nmax,Tolerance,n
     
     % Initial residuals
     rk      = PreConditionerLeft(r0)    ; % Iterate residual
-    r0Norm  = norm(r0,2)                ; % True initial residual
-    rkNorm  = norm(r0,2)                ; % Iterated initial residual
+    rkNorm  = norm(rk,2)                ; % Iterated initial residual
     
     % Convergence iteration setup
-    NotDone      = r0Norm > Tolerance   ;
-    Tolerance    = r0Norm * Tolerance   ;
+    NotDone      = rkNorm > Tolerance   ;
+    Tolerance    = rkNorm * Tolerance   ;
     Iterations   = 0                    ;
-    Residuals(1) = r0Norm               ;
+    Residuals(1) = rkNorm               ;
     n            = 2                    ;
     x            = x0                   ;
     
@@ -116,8 +115,8 @@ function [x,Residuals] = GMRESHouseholderCore(A,r0,x0,Nrestarts,Nmax,Tolerance,n
             
             % Apply all previous projections to new the column
             for m = 1:k-1
-                h      = H(1:N-m+1,m);
-                R(:,k) = [R(1:m-1,k) ; R(m:N,k) - 2*h*(h'*R(m:N,k))];
+                h        = H(1:N-m+1,m);
+                R(m:N,k) = R(m:N,k) - 2*h*(h'*R(m:N,k));
             end
             
             % Get the next Householder vector
@@ -127,15 +126,13 @@ function [x,Residuals] = GMRESHouseholderCore(A,r0,x0,Nrestarts,Nmax,Tolerance,n
             H(1:N-k+1,k) = h                                        ;
             
             %   Apply projection to R to bring it into upper triangular form;
-            %   The triu() call explicitly zeros all strictly lower triangular
-            %   components to minimize FP error.
-            R(:,1:k) = triu([R(1:k-1,1:k) ; R(k:N,1:k) - 2 * h * (h'*R(k:N,1:k))]);
+            R(:,1:k) = [R(1:k-1,1:k) ; R(k:N,1:k) - 2 * h * (h'*R(k:N,1:k))];
             
             % Get the k-th column of the current unitary matrix
             Q(:,k) = [zeros(k-1,1) ; e(1:N-k+1) - 2*h*(h'*e(1:N-k+1))];
             for m = k-1:-1:1
-                hm     = H(1:N-m+1,m);
-                Q(:,k) = [Q(1:m-1,k) ; Q(m:N,k) - 2*hm*(hm'*Q(m:N,k))];
+                hm       = H(1:N-m+1,m);
+                Q(m:N,k) =  Q(m:N,k) - 2*hm*(hm'*Q(m:N,k));
             end
             
             % Update residual
@@ -179,7 +176,7 @@ function [x,Residuals] = GMRESHouseholderCore(A,r0,x0,Nrestarts,Nmax,Tolerance,n
         % Update solution
 
         % Solve the least-squares problem
-        yk = R(1:k,1:k) \ alpha(1:k);
+        yk = triu(R(1:k,1:k)) \ alpha(1:k);
     
         % Calculate actual shift of guess
         dx = PreConditionerRight(Z(:,1:k)*yk);
@@ -187,4 +184,5 @@ function [x,Residuals] = GMRESHouseholderCore(A,r0,x0,Nrestarts,Nmax,Tolerance,n
         
     end
 
+    Residuals = Residuals(1:k+1);
 end
