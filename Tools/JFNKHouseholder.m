@@ -17,11 +17,12 @@ function [x,IterationsNonlinear] = JFNKHouseholder(x0,F,epsilon)
     Z = zeros(N,Nmax)   ; % Hold's update basis vectors
     H = zeros(N,Nmax)   ; % Holds Householder vectors for projections
     V = zeros(N,Nmax)   ; % Holds unitary matrix columns of QR decomposition
-    R = zeros(N,Nmax)   ; % Holds upper-triangular matrix for least-square problem
+    R = zeros(N,Nmax)   ; % Holds upper-triangular matrix for least-squares problem
     
     % Unit vector used for projections
     e     = [1 ; zeros(N-1,1)]  ;
     alpha = zeros(N,1)          ;
+
     % Threshold parameter used to determine which basis to use in the GMRES iterations
     nu = 0.85;
 
@@ -36,7 +37,8 @@ function [x,IterationsNonlinear] = JFNKHouseholder(x0,F,epsilon)
     r0    = -F(x0)      ;
     rNorm = norm(r0,2)  ;
     
-    disp(rNorm);
+    % Backtrack relaxor
+    relaxor = 0.5;
     
     % Determine if the loop is needed
     NotDone = rNorm > NonlinearTolerance;
@@ -56,7 +58,13 @@ function [x,IterationsNonlinear] = JFNKHouseholder(x0,F,epsilon)
         
         % Update x
         yk = R(I,I) \ alpha(I)      ;   % Solve the least-squares problem
-        x  = x + Z(:,I) * yk       ;   % Calculate actual new x value
+        dx = Z(:,I) * yk            ;   % Calculate full Newton update
+        
+        % Backtracker
+        while (norm(F(x),2) < norm(F(x + dx),2))
+            dx = relaxor * dx;
+        end
+        x  = x + dx ;   % Calculate relaxed x value
         
         % Check non-linear residual
         r     = -F(x)       ;
